@@ -26,17 +26,15 @@ def plot_images(image1:k4a.Image, image2:k4a.Image, image3:k4a.Image, cmap:str='
 
     # Create figure and subplots.
     fig = plt.figure()
-    ax = []
-    ax.append(fig.add_subplot(1, 3, 1, label="Color"))
+    ax = [fig.add_subplot(1, 3, 1, label="Color")]
     ax.append(fig.add_subplot(1, 3, 2, label="Depth"))
     ax.append(fig.add_subplot(1, 3, 3, label="IR"))
 
     # Display images.
-    im = []
-    im.append(ax[0].imshow(image1.data))
+    im = [ax[0].imshow(image1.data)]
     im.append(ax[1].imshow(image2.data, cmap='jet'))
 
-    if len(cmap) == 0:
+    if not cmap:
         im.append(ax[2].imshow(image3.data))
     else:
         im.append(ax[2].imshow(image3.data, cmap=cmap))

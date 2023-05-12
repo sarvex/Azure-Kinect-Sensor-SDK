@@ -33,8 +33,7 @@ def parse_args():
   parser.add_argument("-o", "--out-dir", required=True,
     help="Output directory for full calibration blob.")
 
-  cmd_args = parser.parse_args()
-  return cmd_args
+  return parser.parse_args()
 
 if __name__ == "__main__":
   args = parse_args()

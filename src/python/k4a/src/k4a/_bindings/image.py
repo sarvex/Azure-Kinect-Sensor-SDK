@@ -240,8 +240,12 @@ class Image:
             array_type = _ctypes.c_ubyte * buffer_size
             array_len_bytes = buffer_size
         elif image_format == EImageFormat.COLOR_NV12:
-            array_type = ((_ctypes.c_ubyte * 1) * width_pixels) * (height_pixels + int(height_pixels/2)) 
-            array_len_bytes = width_pixels * (height_pixels + int(height_pixels/2))
+            array_type = (
+                (_ctypes.c_ubyte * 1)
+                * width_pixels
+                * (height_pixels + height_pixels // 2)
+            )
+            array_len_bytes = width_pixels * (height_pixels + height_pixels // 2)
         elif image_format == EImageFormat.COLOR_YUY2:
             array_type = (_ctypes.c_ubyte * width_pixels*2) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 2
@@ -324,8 +328,6 @@ class Image:
         - If an error occurs, then None is returned.
         '''
 
-        image = None
-
         assert(isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
         assert(width_pixels > 0), "width_pixels must be greater than zero."
         assert(height_pixels > 0), "height_pixels must be greater than zero."
@@ -342,10 +344,11 @@ class Image:
             _ctypes.c_int(stride_bytes),
             _ctypes.byref(image_handle))
 
-        if status == EStatus.SUCCEEDED:
-            image = Image._create_from_existing_image_handle(image_handle)
-
-        return image
+        return (
+            Image._create_from_existing_image_handle(image_handle)
+            if status == EStatus.SUCCEEDED
+            else None
+        )
 
     @staticmethod
     def create_from_ndarray(
@@ -398,8 +401,6 @@ class Image:
         @remarks
         - If an error occurs, then None is returned.
         '''
-        image = None
-
         assert(isinstance(arr, _nd.ndarray)), "arr must be a numpy ndarray object."
         assert(isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
 
@@ -439,10 +440,11 @@ class Image:
             None,
             _ctypes.byref(image_handle))
 
-        if status == EStatus.SUCCEEDED:
-            image = Image._create_from_existing_image_handle(image_handle)
-
-        return image
+        return (
+            Image._create_from_existing_image_handle(image_handle)
+            if status == EStatus.SUCCEEDED
+            else None
+        )
 
     def _release(self):
         k4a_image_release(self.__image_handle)
@@ -551,9 +553,8 @@ class Image:
     def _image_handle(self):
         
         # Release the image before deleting.
-        if isinstance(self._data, _np.ndarray):
-            if not self._data.flags.owndata:
-                k4a_image_release(self.__image_handle)
+        if isinstance(self._data, _np.ndarray) and not self._data.flags.owndata:
+            k4a_image_release(self.__image_handle)
 
         del self.__image_handle
         self.__image_handle = None

@@ -27,8 +27,7 @@ def parse_args():
   parser.add_argument("-c", "--calib-file", default=None,
     help="Optional initial calibration file.")
 
-  cmd_args = parser.parse_args()
-  return cmd_args
+  return parser.parse_args()
 
 if __name__ == "__main__":
   args = parse_args()

@@ -44,8 +44,7 @@ def simple_viewer():
 
     # Open a matplotlib figure to display images.
     fig = plt.figure()
-    ax = []
-    ax.append(fig.add_subplot(1, 3, 1, label="Color"))
+    ax = [fig.add_subplot(1, 3, 1, label="Color")]
     ax.append(fig.add_subplot(1, 3, 2, label="Depth"))
     ax.append(fig.add_subplot(1, 3, 3, label="IR"))
 
@@ -53,8 +52,7 @@ def simple_viewer():
     # color : the color image
     # depth : the depth image
     # ir : the ir image
-    im = []
-    im.append(ax[0].imshow(capture.color.data))
+    im = [ax[0].imshow(capture.color.data)]
     im.append(ax[1].imshow(capture.depth.data, cmap='jet'))
     im.append(ax[2].imshow(capture.ir.data, cmap='gray'))
 

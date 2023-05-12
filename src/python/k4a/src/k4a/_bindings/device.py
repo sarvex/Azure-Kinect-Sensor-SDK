@@ -53,24 +53,23 @@ from .capture import Capture
 from .calibration import Calibration
 
 
-def _read_sync_jack_helper(device_handle:_DeviceHandle)->(bool, bool):
-    
-    retval = (False, False)
+def _read_sync_jack_helper(device_handle:_DeviceHandle) -> (bool, bool):
     
     # Read the sync jack.
     sync_in = _ctypes.c_bool(0)
     sync_out = _ctypes.c_bool(0)
-    
+
     status = k4a_device_get_sync_jack(
         device_handle,
         _ctypes.byref(sync_in),
         _ctypes.byref(sync_out)
     )
 
-    if status == EStatus.SUCCEEDED:
-        retval = (sync_in.value, sync_out.value)
-
-    return retval
+    return (
+        (sync_in.value, sync_out.value)
+        if status == EStatus.SUCCEEDED
+        else (False, False)
+    )
 
 
 class Device:
@@ -199,17 +198,17 @@ class Device:
             serial_number_size = _ctypes.c_size_t(Device._MAX_SERIAL_NUM_LENGTH)
             serial_number_buffer = _ctypes.create_string_buffer(
                 Device._MAX_SERIAL_NUM_LENGTH)
-            
+
             status_buffer = k4a_device_get_serialnum(
                 device.__device_handle,
                 serial_number_buffer,
                 _ctypes.byref(serial_number_size))
-            
+
             if status_buffer == EBufferStatus.SUCCEEDED:
                 device._serial_number = str(serial_number_buffer.value)
             else:
-                device._serial_number = str('')
-            
+                device._serial_number = ''
+
             # Get hardware version.
             status = k4a_device_get_version(
                 device.__device_handle,
@@ -258,10 +257,10 @@ class Device:
                     device._color_ctrl_cap.__dict__[command].step_value = int(step_value.value)
                     device._color_ctrl_cap.__dict__[command].default_value = int(default_value.value)
                     device._color_ctrl_cap.__dict__[command].default_mode = EColorControlMode(color_control_mode.value)
-        
+
             # Read the sync jack.
             (device._sync_in_connected, device._sync_out_connected) = \
-                _read_sync_jack_helper(device.__device_handle)
+                    _read_sync_jack_helper(device.__device_handle)
 
         return device
 
@@ -284,7 +283,7 @@ class Device:
         del self.__device_handle
         self.__device_handle = None
 
-    def get_capture(self, timeout_ms:int)->Capture:
+    def get_capture(self, timeout_ms:int) -> Capture:
         '''! Reads a sensor capture.
 
         @param timeout_ms (int): Specifies the time in milliseconds the 
@@ -327,8 +326,6 @@ class Device:
             stop_cameras() or close() is called on another thread, this 
             function will encounter an error and return None.
         '''
-        capture = None
-
         # Get a capture handle.
         capture_handle = _CaptureHandle()
         timeout_in_ms = _ctypes.c_int32(timeout_ms)
@@ -337,10 +334,11 @@ class Device:
             _ctypes.byref(capture_handle),
             timeout_in_ms)
 
-        if status == EStatus.SUCCEEDED:
-            capture = Capture(capture_handle=capture_handle)
-
-        return capture
+        return (
+            Capture(capture_handle=capture_handle)
+            if status == EStatus.SUCCEEDED
+            else None
+        )
 
     def get_imu_sample(self, timeout_ms:int)->ImuSample:
         '''! Reads an IMU sample.
@@ -399,7 +397,7 @@ class Device:
 
         return imu_sample
 
-    def start_cameras(self, device_config:DeviceConfiguration)->EStatus:
+    def start_cameras(self, device_config:DeviceConfiguration) -> EStatus:
         '''! Starts color and depth camera capture.
 
         @param device_config (DeviceConfiguration): The configuration to run
@@ -418,11 +416,9 @@ class Device:
 
         @see DeviceConfiguration, stop_cameras
         '''
-        status = k4a_device_start_cameras(
-            self.__device_handle,
-            _ctypes.byref(device_config))
-        
-        return status
+        return k4a_device_start_cameras(
+            self.__device_handle, _ctypes.byref(device_config)
+        )
 
     def stop_cameras(self):
         '''! Stops the color and depth camera capture.
@@ -538,7 +534,7 @@ class Device:
         self,
         color_ctrl_command:EColorControlCommand,
         color_ctrl_mode:EColorControlMode,
-        color_ctrl_value:int)->EStatus:
+        color_ctrl_value:int) -> EStatus:
         '''! Set the Azure Kinect color sensor control value.
 
         @param color_ctrl_command (EColorControlCommand): Color sensor control
@@ -564,13 +560,9 @@ class Device:
         command = _ctypes.c_int(color_ctrl_command.value)
         mode = _ctypes.c_int(color_ctrl_mode.value)
 
-        status = k4a_device_set_color_control(
-            self.__device_handle,
-            command,
-            mode,
-            value)
-
-        return status
+        return k4a_device_set_color_control(
+            self.__device_handle, command, mode, value
+        )
 
     def get_raw_calibration(self)->bytearray:
         '''! Get the raw calibration blob for the entire Azure Kinect device.
@@ -619,7 +611,7 @@ class Device:
 
     def get_calibration(self,
         depth_mode:EDepthMode,
-        color_resolution:EColorResolution)->Calibration:
+        color_resolution:EColorResolution) -> Calibration:
         '''! Get the camera calibration for the entire Azure Kinect device for
             a specific depth mode and color resolution.
 
@@ -644,8 +636,6 @@ class Device:
         - The calibration object is used to instantiate the 
             Transformation class and functions.
         '''
-        calibration = None
-
         if not isinstance(depth_mode, EDepthMode):
             depth_mode = EDepthMode(depth_mode)
 
@@ -660,11 +650,11 @@ class Device:
             color_resolution,
             _ctypes.byref(_calibration))
 
-        if status == EStatus.SUCCEEDED:
-            # Wrap the ctypes struct into a non-ctypes class.
-            calibration = Calibration(_calibration=_calibration)
-
-        return calibration
+        return (
+            Calibration(_calibration=_calibration)
+            if status == EStatus.SUCCEEDED
+            else None
+        )
 
     # Define properties and get/set functions. ############### 
     @property

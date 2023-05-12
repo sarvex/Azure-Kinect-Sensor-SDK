@@ -26,7 +26,9 @@ def glb_print_message(context:ctypes.c_void_p,
                       src_file:ctypes.POINTER(ctypes.c_char), 
                       src_line:ctypes.c_int, 
                       message:ctypes.POINTER(ctypes.c_char)):
-    print(str(level) + " in " + str(src_file) + " at line " + str(src_line) + ": " + str(message))
+    print(
+        f"{str(level)} in {str(src_file)} at line {str(src_line)}: {str(message)}"
+    )
     
     
 # Used to get a capture from device, or a previously-captured capture.

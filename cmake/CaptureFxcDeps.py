@@ -35,9 +35,8 @@ def main(argv):
 
         inputs = []
         for line in stdout.split(os.linesep):
-            matchObj = re.match( r'Resolved to \[(.*)\]', line)
-            if (matchObj):
-                inputs.append(matchObj.group(1))
+            if matchObj := re.match(r'Resolved to \[(.*)\]', line):
+                inputs.append(matchObj[1])
 
         for outfile in args.outputs:
             if (outfile.startswith(args.prefix)):
@@ -46,13 +45,13 @@ def main(argv):
             if (outfile.startswith('/')):
                 outfile = outfile[1:]
 
-            output.write("{} : {}\n".format( outfile, " ".join(inputs) ))
+            output.write(f'{outfile} : {" ".join(inputs)}\n')
 
     # Print the output only on errors
     if (proc.returncode != 0):
         print([args.fxc] + args.fxcargs)
         print(stdout)
-        print('Done ({})'.format(proc.returncode))
+        print(f'Done ({proc.returncode})')
 
     sys.exit(proc.returncode)
 

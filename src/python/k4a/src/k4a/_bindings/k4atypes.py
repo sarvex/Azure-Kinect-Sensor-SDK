@@ -10,6 +10,7 @@ Kinect For Azure SDK.
 '''
 
 
+
 from enum import IntEnum as _IntEnum
 from enum import unique as _unique
 from enum import auto as _auto
@@ -19,13 +20,8 @@ import platform as _platform
 
 
 # Determine the calling convention to use.
-_IS_WINDOWS = 'Windows' == _platform.system()
-if _IS_WINDOWS:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
-else:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
-
-
+_IS_WINDOWS = _platform.system() == 'Windows'
+_FUNCTYPE = _ctypes.CFUNCTYPE
 @_unique
 class EStatus(_IntEnum):
     '''! Result code returned by Azure Kinect APIs.
@@ -245,7 +241,7 @@ class EImageFormat(_IntEnum):
     </table>
     '''
 
-    
+
     COLOR_MJPG = 0
     COLOR_NV12 = _auto()
     COLOR_YUY2 = _auto()
@@ -1108,10 +1104,10 @@ class _EmptyClass:
         keys = list(self.__dict__.keys())
         tempstr = ''
 
-        if len(keys) > 0:
+        if keys:
             for n in range(len(keys)-1):
                 tempstr = tempstr + str(keys[n]) + "=" + str(self.__dict__[keys[n]]) + ", "
-            tempstr = tempstr + str(keys[len(keys)-1]) + "=" + str(self.__dict__[keys[len(keys)-1]])
+            tempstr = tempstr + str(keys[-1]) + "=" + str(self.__dict__[keys[-1]])
 
         return tempstr
 

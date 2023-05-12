@@ -221,8 +221,7 @@ def get_image_points(board:aruco_CharucoBoard,
     np.ndarray: numpy array (n*1*3) markers 3d positions.
   """
 
-  object_points = board.chessboardCorners[marker_ids, :]
-  return object_points
+  return board.chessboardCorners[marker_ids, :]
 
 #-------------------------------------------------------------------------------
 def detect_markers(img: np.ndarray,
@@ -376,7 +375,7 @@ def estimate_pose(img: np.array,
 def pose_as_dataclass(array_a:np.array,
                       template:str,
                       calib_a:str,
-                      img_a:str)-> RTMatrix:
+                      img_a:str) -> RTMatrix:
   """Get RT of camera to board.
 
   Args:
@@ -396,8 +395,7 @@ def pose_as_dataclass(array_a:np.array,
   if retval_a is False:
     raise RegistrationError(f"Could not estimate pose for image @ {img_a}")
 
-  pose_a = RTMatrix(rvec_a, tvec_a)
-  return pose_a
+  return RTMatrix(rvec_a, tvec_a)
 
 #-------------------------------------------------------------------------------
 def unproject(points:np.array, k_mat:np.array, dist:np.array) -> np.array:
@@ -427,8 +425,7 @@ def unproject(points:np.array, k_mat:np.array, dist:np.array) -> np.array:
                                 k_mat,
                                 term_criteria)
 
-  rays = (x_u-principal_point)/focal_length
-  return rays
+  return (x_u-principal_point)/focal_length
 
 #-------------------------------------------------------------------------------
 def registration_error(array_a:np.array,
@@ -569,11 +566,10 @@ def calibrate_camera(
   # output cal file
   calfile = os.path.join(imdir, f"calib{postfix}.yml")
 
-  imgnames = []
-  for file in os.listdir(imdir):
-    if fnmatch.fnmatch(file, "*.png") or fnmatch.fnmatch(file, "*.jpg"):
-      imgnames.append(os.path.join(imdir, file))
-
+  imgnames = [
+      os.path.join(imdir, file) for file in os.listdir(imdir)
+      if fnmatch.fnmatch(file, "*.png") or fnmatch.fnmatch(file, "*.jpg")
+  ]
   num_images = len(imgnames)
   if num_images < min_images:
     msg = f"Not Enough images. {num_images} found, {min_images} required."
@@ -621,7 +617,7 @@ def calibrate_camera(
   [failing_idxs.append(str(index)) for (index, err) in enumerate(perViewErrors) if err[0] > per_view_threshold]
   warning_failing_indexes = "Failing image indices: " + ", ".join(failing_idxs)
 
-  if len(failing_idxs) != 0:
+  if failing_idxs:
     warnings.warn(warning_failing_indexes)
 
   if num_good_images < min_quality_images:
@@ -633,7 +629,7 @@ def calibrate_camera(
   img_size_as_array = np.array([np.array([img_size[0]]),
                                 np.array([img_size[1]])])
   if rms < rms_thr:
-    print("calibrate_camera took {} sec".format(time.perf_counter()-start))
+    print(f"calibrate_camera took {time.perf_counter() - start} sec")
     write_opencv_calfile(calfile, k_matrix, dist8, img_size_as_array)
     write_json(os.path.join(imdir, "report.json"), {"RMS_pixels":rms})
   else:

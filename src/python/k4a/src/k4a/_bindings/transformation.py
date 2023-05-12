@@ -106,7 +106,7 @@ class Transformation:
     def point_3d_to_point_3d(self,
         source_point_3d:(float, float, float),
         source_camera:ECalibrationType,
-        target_camera:ECalibrationType)->(float, float, float):
+        target_camera:ECalibrationType) -> (float, float, float):
         '''! Transform a 3D point of a source coordinate system into a 3D point
             of the target coordinate system.
 
@@ -133,8 +133,6 @@ class Transformation:
         - If an error occurs, then (None, None, None) is returned.
         '''
 
-        target_point = (None, None, None)
-
         src_pt = _Float3(
             x = source_point_3d[0],
             y = source_point_3d[1],
@@ -149,16 +147,17 @@ class Transformation:
             target_camera,
             _ctypes.byref(tgt_pt))
 
-        if (status == EStatus.SUCCEEDED):
-            target_point = (tgt_pt.xyz.x, tgt_pt.xyz.y, tgt_pt.xyz.z)
-
-        return target_point
+        return (
+            (tgt_pt.xyz.x, tgt_pt.xyz.y, tgt_pt.xyz.z)
+            if (status == EStatus.SUCCEEDED)
+            else (None, None, None)
+        )
 
     def pixel_2d_to_point_3d(self,
         source_pixel_2d:(float, float),
         source_depth_mm:float,
         source_camera:ECalibrationType,
-        target_camera:ECalibrationType)->(float, float, float):
+        target_camera:ECalibrationType) -> (float, float, float):
         '''! Transform a 2D pixel of a source camera with an associated depth
             value into a 3D point of the target coordinate system.
 
@@ -192,8 +191,6 @@ class Transformation:
             coordinate, then (None, None, None) is returned.
         '''
 
-        target_point = (None, None, None)
-
         src_pt = _Float2(
             x = source_pixel_2d[0],
             y = source_pixel_2d[1])
@@ -209,15 +206,16 @@ class Transformation:
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
-            target_point = (tgt_pt.xyz.x, tgt_pt.xyz.y, tgt_pt.xyz.z)
-
-        return target_point
+        return (
+            (tgt_pt.xyz.x, tgt_pt.xyz.y, tgt_pt.xyz.z)
+            if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1)
+            else (None, None, None)
+        )
 
     def point_3d_to_pixel_2d(self,
         source_point_3d:(float, float, float),
         source_camera:ECalibrationType,
-        target_camera:ECalibrationType)->(float, float):
+        target_camera:ECalibrationType) -> (float, float):
         '''! Transform a 3D point of a source camera with into a 2D pixel 
         coordinate of the target camera
 
@@ -246,8 +244,6 @@ class Transformation:
             coordinate, then (None, None, None) is returned.
         '''
 
-        target_point = (None, None)
-
         src_pt = _Float3(
             x = source_point_3d[0],
             y = source_point_3d[1],
@@ -263,16 +259,17 @@ class Transformation:
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
-            target_point = (tgt_pt.xy.x, tgt_pt.xy.y)
-
-        return target_point
+        return (
+            (tgt_pt.xy.x, tgt_pt.xy.y)
+            if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1)
+            else (None, None)
+        )
 
     def pixel_2d_to_pixel_2d(self,
         source_pixel_2d:(float, float),
         source_depth_mm:float,
         source_camera:ECalibrationType,
-        target_camera:ECalibrationType)->(float, float):
+        target_camera:ECalibrationType) -> (float, float):
         '''! Transform a 2D pixel coordinate with an associated depth value of
             the source camera into a 2D pixel coordinate of the target camera.
 
@@ -307,8 +304,6 @@ class Transformation:
             coordinate, then (None, None) is returned.
         '''
 
-        target_point = (None, None)
-
         src_pt = _Float2(
             x = source_pixel_2d[0],
             y = source_pixel_2d[1])
@@ -324,14 +319,15 @@ class Transformation:
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
-            target_point = (tgt_pt.xy.x, tgt_pt.xy.y)
-
-        return target_point
+        return (
+            (tgt_pt.xy.x, tgt_pt.xy.y)
+            if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1)
+            else (None, None)
+        )
 
     def color_2d_to_depth_2d(self,
         source_pixel_2d:(float, float),
-        depth:Image)->(float, float):
+        depth:Image) -> (float, float):
         '''! Transform a 2D pixel coordinate from color camera into a 2D pixel
             coordinate of the depth camera.
 
@@ -353,8 +349,6 @@ class Transformation:
             for these color pixels, then call the function pixel_2d_to_pixel_2d().
         '''
 
-        target_point = (None, None)
-
         src_pt = _Float2(
             x = source_pixel_2d[0],
             y = source_pixel_2d[1])
@@ -368,10 +362,11 @@ class Transformation:
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
-            target_point = (tgt_pt.xy.x, tgt_pt.xy.y)
-
-        return target_point
+        return (
+            (tgt_pt.xy.x, tgt_pt.xy.y)
+            if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1)
+            else (None, None)
+        )
 
     def depth_image_to_color_camera(self, depth:Image)->Image:
         '''! Transforms the depth map into the geometry of the color camera.

@@ -24,7 +24,7 @@ def get_1080p_bgr32_nfov_2x2binned(device_handle):
 def k4a_device_get_color_control_capability(
     device_handle:k4a._bindings.k4a._DeviceHandle,
     color_control_command:k4a.EColorControlCommand
-    )->k4a.EStatus:
+    ) -> k4a.EStatus:
 
     supports_auto = ctypes.c_bool(False)
     min_value = ctypes.c_int32(0)
@@ -33,7 +33,7 @@ def k4a_device_get_color_control_capability(
     default_value = ctypes.c_int32(0)
     color_control_mode = ctypes.c_int32(k4a.EColorControlMode.AUTO.value)
 
-    status = k4a._bindings.k4a.k4a_device_get_color_control_capabilities(
+    return k4a._bindings.k4a.k4a_device_get_color_control_capabilities(
         device_handle,
         color_control_command,
         ctypes.byref(supports_auto),
@@ -43,8 +43,6 @@ def k4a_device_get_color_control_capability(
         ctypes.byref(default_value),
         ctypes.byref(color_control_mode),
     )
-
-    return status
 
 def k4a_device_set_and_get_color_control(
     device_handle:k4a._bindings.k4a._DeviceHandle,

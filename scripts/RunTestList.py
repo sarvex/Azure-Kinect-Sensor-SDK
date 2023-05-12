@@ -24,12 +24,12 @@ def main(argv):
 
     # Check binary directory
     if not os.path.isdir(args.bin):
-        print(args.bin + " is not a directory")
+        print(f"{args.bin} is not a directory")
         sys.exit(2)
 
     # Read test list
     if not os.path.isfile(args.list):
-        print(args.list + " does not exist")
+        print(f"{args.list} does not exist")
         sys.exit(1)
     with open(args.list) as f:
         test_list = f.read().splitlines()
@@ -38,14 +38,14 @@ def main(argv):
     for test in test_list:
         test = os.path.join(args.bin, test)
         if not os.path.isfile(test):
-            print("Can not find test " + test)
+            print(f"Can not find test {test}")
             sys.exit(3)
 
         if args.output:
             output_arg = "--gtest_output={0}:TEST-{1}.{0}".format(args.output, os.path.splitext(os.path.basename(test))[0])
             gtestfullargs = [output_arg] + gtestargs
 
-        print("Running test " + test)
+        print(f"Running test {test}")
         print(' '.join([test] + gtestfullargs))
         sys.stdout.flush()
 

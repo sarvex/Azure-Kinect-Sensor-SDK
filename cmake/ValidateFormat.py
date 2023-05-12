@@ -26,17 +26,17 @@ def main(argv):
             # Sometimes clang-format will reformat a file, but running it again will apply additional changes
             filetime = os.path.getmtime(file)
             updatefile = True
-            while (updatefile):
+            while updatefile:
                 proc = subprocess.Popen([args.clangformat] + ['-i', file], stdout=subprocess.PIPE, encoding="utf-8")
                 stdout = proc.stdout.read()
                 proc.wait()
 
                 updatefile = False
                 updatedtime = os.path.getmtime(file)
-                
+
                 if (updatedtime != filetime):
                     updatefile = True
-                    print("clang-format updated {}".format(file))
+                    print(f"clang-format updated {file}")
                 filetime = updatedtime
         else:
             proc = subprocess.Popen([args.clangformat] + ['-output-replacements-xml', file], stdout=subprocess.PIPE, encoding="utf-8")
@@ -71,27 +71,19 @@ def main(argv):
 
                     # If this replacement is on a different line from the last one,
                     # print the error information from the previous line
-                    if linewitherrors != lineno and linewitherrors != 0:
-                        err = "Error {} ({}): {} clang-format replacements on line".format(
-                            file, 
-                            linewitherrors,
-                            replacementsonline
-                            )
+                    if linewitherrors not in [lineno, 0]:
+                        err = f"Error {file} ({linewitherrors}): {replacementsonline} clang-format replacements on line"
 
                         print(err)
                         replacementsonline = 0
-                       
+
                     # Count the number of replacements on this line
                     linewitherrors = lineno
                     replacementsonline = replacementsonline + 1
 
             # Print the last line of replacment information if any
             if linewitherrors != 0:
-                err = "Error {} ({}): {} clang-format replacements on line".format(
-                    file, 
-                    linewitherrors,
-                    replacementsonline,
-                    )
+                err = f"Error {file} ({linewitherrors}): {replacementsonline} clang-format replacements on line"
                 print(err)
                 print("     Run the clangformat target to auto-clean (e.g. \"ninja clangformat\")")
 

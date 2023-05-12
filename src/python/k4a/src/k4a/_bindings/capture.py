@@ -87,16 +87,15 @@ class Capture:
         - If unsuccessful, None is returned.
         '''
 
-        capture = None
-
         # Create a capture.
         capture_handle = _CaptureHandle()
         status = k4a_capture_create(_ctypes.byref(capture_handle))
 
-        if status == EStatus.SUCCEEDED:
-            capture = Capture(capture_handle=capture_handle)
-
-        return capture
+        return (
+            Capture(capture_handle=capture_handle)
+            if status == EStatus.SUCCEEDED
+            else None
+        )
 
     def _release(self):
         k4a_capture_release(self._capture_handle)
